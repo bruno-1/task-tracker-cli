@@ -39,6 +39,25 @@ export default class TaskDao {
     return task;
   }
 
+  async update(id, updatedData) {
+    const index = this.tasks.findIndex(t => t.id === id);
+    if (index === -1) throw new Error(`Task with id ${id} not found`);
+
+    const existing = this.tasks[index];
+    const updatedTask = new Task({
+      id: existing.id,
+      description: updatedData.description ?? existing.description,
+      status: updatedData.status ?? existing.status,
+      createdAt: existing.createdAt,
+      updatedAt: new Date(),
+    });
+
+    this.tasks[index] = updatedTask;
+    await this.#persist();
+
+    return updatedTask;
+  }
+
   async #persist() {
     await writeFile(this.filePath, JSON.stringify(this.tasks, (_, value) => {
       return value instanceof Date ? value.toISOString() : value;
