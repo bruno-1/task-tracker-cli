@@ -34,7 +34,8 @@ test('Task DAO', (t) => {
     assert.strictEqual(task.createdAt.getTime(), tasks[0].createdAt.getTime());
     assert.strictEqual(task.updatedAt.getTime(), tasks[0].updatedAt.getTime());
 
-    const fileContent = JSON.parse(await readFile(mockFileJson));
+    const file = await readFile(mockFileJson);
+    const fileContent = JSON.parse(file);
     assert.equal(fileContent.length, 1);
     assert.equal(fileContent[0].description, 'Cook Dinner');
   });
