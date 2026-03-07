@@ -34,11 +34,15 @@ export default class TaskDao {
     });
 
     this.tasks.push(task);
+    this.#persist();
+
+    return task;
+  }
+
+  async #persist() {
     await writeFile(this.filePath, JSON.stringify(this.tasks, (_, value) => {
       return value instanceof Date ? value.toISOString() : value;
     }));
-
-    return task;
   }
 
   async #loadFromFile() {
