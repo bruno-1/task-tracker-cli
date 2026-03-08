@@ -19,10 +19,6 @@ export default class TaskDao {
     return this.tasks.filter(task => task.status === status);
   }
 
-  #findNotByStatus(status) {
-    return this.tasks.filter(task => task.status !== status);
-  }
-
   findAll() {
     return this.tasks;
   }
@@ -31,8 +27,8 @@ export default class TaskDao {
     return this.#findByStatus('done');
   }
 
-  findNotDone() {
-    return this.#findNotByStatus('done');
+  findTodo() {
+    return this.#findByStatus('todo');
   }
 
   findInProgress() {

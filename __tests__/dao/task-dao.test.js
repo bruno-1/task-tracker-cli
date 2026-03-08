@@ -75,7 +75,7 @@ test('Task DAO', (t) => {
     assert.strictEqual(doneTasks[0].id, task1.id);
   });
 
-  t.test('should return only tasks not done', async (t) => {
+  t.test('should return only todo tasks', async (t) => {
     const dao = new TaskDao(mockFileJson);
     await dao.init();
 
@@ -86,15 +86,10 @@ test('Task DAO', (t) => {
     await dao.update(task1.id, { status: 'done' });
     await dao.update(task2.id, { status: 'in-progress' });
 
-    const notDoneTasks = dao.findNotDone();
+    const todoTasks = dao.findTodo();
 
-    assert.strictEqual(notDoneTasks.length, 2);
-
-    const ids = notDoneTasks.map(task => task.id);
-
-    assert.ok(ids.includes(task2.id));
-    assert.ok(ids.includes(task3.id));
-    assert.ok(!ids.includes(task1.id));
+    assert.equal(todoTasks.length, 1);
+    assert.strictEqual(todoTasks[0].id, task3.id);
   });
 
   t.test('should return only tasks in progress', async (t) => {
