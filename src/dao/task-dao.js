@@ -16,13 +16,7 @@ export default class TaskDao {
   }
 
   findAll() {
-    return this.tasks.map(task => new Task({
-      id: task.id,
-      description: task.description,
-      status: task.status,
-      createdAt: new Date(task.createdAt),
-      updatedAt: new Date(task.updatedAt),
-    }));
+    return this.tasks;
   }
 
   async insert(taskData) {
@@ -85,7 +79,11 @@ export default class TaskDao {
       }
 
       const content = await readFile(this.filePath);
-      return JSON.parse(content);
+      return JSON.parse(content).map(task => new Task({
+        ...task,
+        createdAt: new Date(task.createdAt),
+        updatedAt: new Date(task.updatedAt),
+      }));
     } catch (error) {
       console.error('Failed to load tasks:', error);
       return [];
