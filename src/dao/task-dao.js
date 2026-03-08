@@ -63,17 +63,13 @@ export default class TaskDao {
   }
 
   async #persist() {
-    await writeFile(this.filePath, JSON.stringify(this.tasks, (_, value) => {
-      return value instanceof Date ? value.toISOString() : value;
-    }));
+    await writeFile(this.filePath, JSON.stringify(this.tasks, this.#dateReplacer));
   }
 
   async #loadFromFile() {
     try {
       if (!existsSync(this.filePath)) {
-        await writeFile(this.filePath, JSON.stringify([], (_, value) => {
-          return value instanceof Date ? value.toISOString() : value;
-        }));
+        await writeFile(this.filePath, JSON.stringify([], this.#dateReplacer));
 
         return [];
       }
@@ -88,6 +84,10 @@ export default class TaskDao {
       console.error('Failed to load tasks:', error);
       return [];
     }
+  }
+
+  #dateReplacer(_, value) {
+    return value instanceof Date ? value.toISOString() : value;
   }
 
   async #generateNextId() {
