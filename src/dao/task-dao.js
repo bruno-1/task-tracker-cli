@@ -15,8 +15,28 @@ export default class TaskDao {
     this.tasks = await this.#loadFromFile();
   }
 
+  #findByStatus(status) {
+    return this.tasks.filter(task => task.status === status);
+  }
+
+  #findNotByStatus(status) {
+    return this.tasks.filter(task => task.status !== status);
+  }
+
   findAll() {
     return this.tasks;
+  }
+
+  findDone() {
+    return this.#findByStatus('done');
+  }
+
+  findNotDone() {
+    return this.#findNotByStatus('done');
+  }
+
+  findInProgress() {
+    return this.#findByStatus('in-progress');
   }
 
   async insert(taskData) {

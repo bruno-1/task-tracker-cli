@@ -58,6 +58,62 @@ test('Task DAO', (t) => {
     assert.equal(tasks.length, 2);
   });
 
+  t.test('should return only done tasks', async (t) => {
+    const dao = new TaskDao(mockFileJson);
+    await dao.init();
+
+    const task1 = await dao.insert({ description: 'Task 1' });
+    const task2 = await dao.insert({ description: 'Task 2' });
+    await dao.insert({ description: 'Task 3' });
+
+    await dao.update(task1.id, { status: 'done' });
+    await dao.update(task2.id, { status: 'in-progress' });
+
+    const doneTasks = dao.findDone();
+
+    assert.equal(doneTasks.length, 1);
+    assert.strictEqual(doneTasks[0].id, task1.id);
+  });
+
+  t.test('should return only tasks not done', async (t) => {
+    const dao = new TaskDao(mockFileJson);
+    await dao.init();
+
+    const task1 = await dao.insert({ description: 'Task 1' });
+    const task2 = await dao.insert({ description: 'Task 2' });
+    const task3 = await dao.insert({ description: 'Task 3' });
+
+    await dao.update(task1.id, { status: 'done' });
+    await dao.update(task2.id, { status: 'in-progress' });
+
+    const notDoneTasks = dao.findNotDone();
+
+    assert.strictEqual(notDoneTasks.length, 2);
+
+    const ids = notDoneTasks.map(task => task.id);
+
+    assert.ok(ids.includes(task2.id));
+    assert.ok(ids.includes(task3.id));
+    assert.ok(!ids.includes(task1.id));
+  });
+
+  t.test('should return only tasks in progress', async (t) => {
+    const dao = new TaskDao(mockFileJson);
+    await dao.init();
+
+    const task1 = await dao.insert({ description: 'Task 1' });
+    const task2 = await dao.insert({ description: 'Task 2' });
+    await dao.insert({ description: 'Task 3' });
+
+    await dao.update(task1.id, { status: 'done' });
+    await dao.update(task2.id, { status: 'in-progress' });
+
+    const inProgressTasks = dao.findInProgress();
+
+    assert.equal(inProgressTasks.length, 1);
+    assert.strictEqual(inProgressTasks[0].id, task2.id);
+  });
+
   t.test('should update an existing task', async () => {
     const dao = new TaskDao(mockFileJson);
     await dao.init();
