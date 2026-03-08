@@ -34,7 +34,7 @@ export default class TaskDao {
     });
 
     this.tasks.push(task);
-    this.#persist();
+    await this.#persist();
 
     return task;
   }
