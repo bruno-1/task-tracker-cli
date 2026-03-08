@@ -83,4 +83,27 @@ test('Task DAO', (t) => {
     assert.strictEqual(tasks[0].createdAt.getTime(), updatedTask.createdAt.getTime());
     assert.strictEqual(tasks[0].updatedAt.getTime(), updatedTask.updatedAt.getTime());
   });
+
+  t.test('should delete an existing task', async () => {
+    const dao = new TaskDao(mockFileJson);
+    await dao.init();
+
+    const task1 = await dao.insert({ description: 'Buy groceries' });
+    const task2 = await dao.insert({ description: 'Cook Dinner' });
+
+    const removedTask = await dao.delete(task1.id);
+
+    assert.strictEqual(removedTask.id, task1.id);
+
+    const tasks = dao.findAll();
+    assert.equal(tasks.length, 1);
+    assert.strictEqual(tasks[0].id, task2.id);
+    assert.strictEqual(tasks[0].description, task2.description);
+
+    const file = await readFile(mockFileJson);
+    const fileContent = JSON.parse(file);
+
+    assert.strictEqual(fileContent.length, 1);
+    assert.strictEqual(fileContent[0].id, task2.id);
+  });
 });

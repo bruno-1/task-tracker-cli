@@ -58,6 +58,16 @@ export default class TaskDao {
     return updatedTask;
   }
 
+  async delete(id) {
+    const index = this.tasks.findIndex(t => t.id === id);
+    if (index === -1) throw new Error(`Task with id ${id} not found`);
+
+    const removedTask = this.tasks.splice(index, 1)[0];
+    await this.#persist();
+
+    return removedTask;
+  }
+
   async #persist() {
     await writeFile(this.filePath, JSON.stringify(this.tasks, (_, value) => {
       return value instanceof Date ? value.toISOString() : value;
