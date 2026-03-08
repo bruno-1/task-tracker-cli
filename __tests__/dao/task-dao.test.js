@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test, { mock } from 'node:test';
 import assert from 'node:assert';
 import path from 'node:path';
 import { writeFile, rm, readFile } from 'node:fs/promises';
@@ -105,5 +105,55 @@ test('Task DAO', (t) => {
 
     assert.strictEqual(fileContent.length, 1);
     assert.strictEqual(fileContent[0].id, task2.id);
+  });
+
+  t.test(
+    'should throw error when updating a non-existing task',
+    { expectFailure: 'Task with id 999 not found' },
+    async () => {
+      const dao = new TaskDao(mockFileJson);
+      await dao.init();
+
+      await dao.update(999, { description: 'new description' });
+    }
+  );
+
+  t.test(
+    'should throw error when deleting a non-existing task',
+    { expectFailure: 'Task with id 999 not found' },
+    async () => {
+      const dao = new TaskDao(mockFileJson);
+      await dao.init();
+
+      await dao.delete(999);
+    }
+  );
+
+  t.test('should generate sequential ids when inserting multiple tasks', async () => {
+    const dao = new TaskDao(mockFileJson);
+    await dao.init();
+
+    const task1 = await dao.insert({ description: 'Task 1' });
+    const task2 = await dao.insert({ description: 'Task 2' });
+    const task3 = await dao.insert({ description: 'Task 3' });
+
+    assert.strictEqual(task1.id, 1);
+    assert.strictEqual(task2.id, 2);
+    assert.strictEqual(task3.id, 3);
+  });
+
+  t.test('should load persisted tasks after reinitializing DAO', async () => {
+    const dao1 = new TaskDao(mockFileJson);
+    await dao1.init();
+
+    await dao1.insert({ description: 'Persisted task' });
+
+    const dao2 = new TaskDao(mockFileJson);
+    await dao2.init();
+
+    const tasks = dao2.findAll();
+
+    assert.strictEqual(tasks.length, 1);
+    assert.equal(tasks[0].description, 'Persisted task');
   });
 });
