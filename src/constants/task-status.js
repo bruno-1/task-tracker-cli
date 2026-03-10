@@ -1,0 +1,1 @@
+export const TASK_STATUS = new Set(['todo', 'in-progress', 'done']);

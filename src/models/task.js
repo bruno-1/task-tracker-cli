@@ -1,6 +1,7 @@
-export default class Task {
-  static #VALID_STATUSES = new Set(['todo', 'in-progress', 'done']);
+import { TASK_STATUS } from '../constants/task-status.js';
 
+
+export default class Task {
   constructor({
     id,
     description,
@@ -10,9 +11,9 @@ export default class Task {
   }) {
     if (!id) throw new TypeError('Id is required');
     if (!description) throw new TypeError('Description is required');
-    if (!Task.#VALID_STATUSES.has(status))
+    if (!TASK_STATUS.has(status))
       throw new TypeError(
-        `Invalid status: ${status}. Valid statuses are: ${Task.#VALID_STATUSES.join(', ')}`
+        `Invalid status: ${status}. Valid statuses are: ${[...TASK_STATUS].join(', ')}`
       );
 
     this.id = id;
@@ -20,9 +21,5 @@ export default class Task {
     this.status = status;
     this.createdAt = createdAt instanceof Date ? createdAt : new Date(createdAt);
     this.updatedAt = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
-  }
-
-  static getValidStatuses() {
-    return [...Task.#VALID_STATUSES];
   }
 }

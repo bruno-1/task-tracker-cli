@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 
 import Task from '../../src/models/task.js';
+import { TASK_STATUS } from '../../src/constants/task-status.js';
 
 
 test('Task Model', (t) => {
@@ -31,7 +32,7 @@ test('Task Model', (t) => {
     'should throw error for invalid status',
     {
       expectFailure:
-        `Invalid status: invalid. Valid statuses are: ${Task.getValidStatuses().join(', ')}`
+        `Invalid status: invalid. Valid statuses are: ${[...TASK_STATUS].join(', ')}`
     },
     () => {
       new Task({ id: 1, description: 'Buy groceries', status: 'invalid' });
