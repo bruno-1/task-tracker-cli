@@ -16,26 +16,39 @@ test('Task Model', (t) => {
     assert.ok(task.updatedAt instanceof Date);
   });
 
-  t.test('should throw error if id is missing', { expectFailure: 'Id is required' }, () => {
-    new Task({ description: 'Buy groceries' });
+  t.test('should throw error if id is missing', () => {
+    assert.throws(
+      () => new Task({ description: 'Buy groceries' }),
+      {
+        name: 'TypeError',
+        message: 'Id is required'
+      }
+    )
   });
 
   t.test(
     'should throw error if description is missing',
-    { expectFailure: 'Description is required' },
     () => {
-      new Task({ id: 1 });
+      assert.throws(
+        () => new Task({ id: 1 }),
+        {
+          name: 'TypeError',
+          message: 'Description is required'
+        }
+      );
     }
   );
 
   t.test(
     'should throw error for invalid status',
-    {
-      expectFailure:
-        `Invalid status: invalid. Valid statuses are: ${[...TASK_STATUS].join(', ')}`
-    },
     () => {
-      new Task({ id: 1, description: 'Buy groceries', status: 'invalid' });
+      assert.throws(
+        () => new Task({ id: 1, description: 'Buy groceries', status: 'invalid' }),
+        {
+          name: 'TypeError',
+          message: `Invalid status: invalid. Valid statuses are: ${[...TASK_STATUS].join(', ')}`
+        }
+      )
     }
   );
 });

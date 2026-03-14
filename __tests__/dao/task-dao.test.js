@@ -139,17 +139,25 @@ test('Task DAO', (t) => {
 
   t.test(
     'should throw error when updating a non-existing task',
-    { expectFailure: 'Task with id 999 not found' },
     async () => {
-      await dao.update(999, { description: 'new description' });
+      await assert.rejects(
+        dao.update(999, { description: 'new description' }),
+        {
+          message: 'Task with id 999 not found'
+        }
+      );
     }
   );
 
   t.test(
     'should throw error when deleting a non-existing task',
-    { expectFailure: 'Task with id 999 not found' },
     async () => {
-      await dao.delete(999);
+      await assert.rejects(
+        dao.delete(999),
+        {
+          message: 'Task with id 999 not found'
+        }
+      );
     }
   );
 
