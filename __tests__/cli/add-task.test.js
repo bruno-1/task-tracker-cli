@@ -1,24 +1,20 @@
-import path from 'node:path';
 import test from 'node:test';
-import { writeFile, rm } from 'node:fs/promises';
 import assert from 'node:assert';
 
-import TaskDao from '../../src/dao/task-dao.js';
+import { createTestDao, destroyTestDao } from '../helpers/create-test-dao.js';
 import { addTask } from '../../src/cli/add-task.js';
 
 
-const mockFileJson = path.resolve('test-add-task.json');
-
 test('Add task', (t) => {
-  const dao = new TaskDao(mockFileJson);
+  let dao;
+  let file;
 
   t.beforeEach(async () => {
-    await writeFile(mockFileJson, JSON.stringify([]));
-    await dao.init();
+    ({ dao, file } = await createTestDao('test-add-task.json'));
   });
 
   t.afterEach(async () => {
-    await rm(mockFileJson);
+    await destroyTestDao(file);
   });
 
   t.test('should do nothing when add command is not present', async () => {

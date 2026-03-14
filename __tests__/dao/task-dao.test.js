@@ -1,28 +1,27 @@
-import test, { mock } from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert';
-import path from 'node:path';
-import { writeFile, rm, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { setTimeout } from 'node:timers/promises';
 
+import { createTestDao, destroyTestDao } from '../helpers/create-test-dao.js';
 import TaskDao from '../../src/dao/task-dao.js';
 import Task from '../../src/models/task.js';
 
 
-const mockFileJson = path.resolve('test-tasks.json');
-
 test('Task DAO', (t) => {
+  let dao;
+  let file;
+
   t.beforeEach(async () => {
-    await writeFile(mockFileJson, JSON.stringify([]));
+    ({ dao, file } = await createTestDao('test-tasks.json'));
   });
 
   t.afterEach(async () => {
-    await rm(mockFileJson);
+    await destroyTestDao(file);
   });
 
   t.test('should insert a new task', async () => {
     const taskData = { description: 'Cook Dinner', };
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
 
     const task = await dao.insert(taskData);
 
@@ -35,16 +34,12 @@ test('Task DAO', (t) => {
     assert.strictEqual(task.createdAt.getTime(), tasks[0].createdAt.getTime());
     assert.strictEqual(task.updatedAt.getTime(), tasks[0].updatedAt.getTime());
 
-    const file = await readFile(mockFileJson);
-    const fileContent = JSON.parse(file);
+    const fileContent = JSON.parse(await readFile(file));
     assert.equal(fileContent.length, 1);
     assert.equal(fileContent[0].description, 'Cook Dinner');
   });
 
   t.test('should return an array of Task instances', async () => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const task1 = { description: 'Buy groceries', };
     const task2 = { description: 'Cook Dinner', };
 
@@ -59,9 +54,6 @@ test('Task DAO', (t) => {
   });
 
   t.test('should return only done tasks', async (t) => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     await dao.insert({ description: 'Task 3' });
@@ -76,9 +68,6 @@ test('Task DAO', (t) => {
   });
 
   t.test('should return only todo tasks', async (t) => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     const task3 = await dao.insert({ description: 'Task 3' });
@@ -93,9 +82,6 @@ test('Task DAO', (t) => {
   });
 
   t.test('should return only tasks in progress', async (t) => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     await dao.insert({ description: 'Task 3' });
@@ -110,9 +96,6 @@ test('Task DAO', (t) => {
   });
 
   t.test('should update an existing task', async () => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const originalTask = await dao.insert({ description: 'Buy groceries', });
     const originalUpdatedAt = originalTask.updatedAt.getTime();
 
@@ -136,9 +119,6 @@ test('Task DAO', (t) => {
   });
 
   t.test('should delete an existing task', async () => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const task1 = await dao.insert({ description: 'Buy groceries' });
     const task2 = await dao.insert({ description: 'Cook Dinner' });
 
@@ -151,8 +131,7 @@ test('Task DAO', (t) => {
     assert.strictEqual(tasks[0].id, task2.id);
     assert.strictEqual(tasks[0].description, task2.description);
 
-    const file = await readFile(mockFileJson);
-    const fileContent = JSON.parse(file);
+    const fileContent = JSON.parse(await readFile(file));
 
     assert.strictEqual(fileContent.length, 1);
     assert.strictEqual(fileContent[0].id, task2.id);
@@ -162,9 +141,6 @@ test('Task DAO', (t) => {
     'should throw error when updating a non-existing task',
     { expectFailure: 'Task with id 999 not found' },
     async () => {
-      const dao = new TaskDao(mockFileJson);
-      await dao.init();
-
       await dao.update(999, { description: 'new description' });
     }
   );
@@ -173,17 +149,11 @@ test('Task DAO', (t) => {
     'should throw error when deleting a non-existing task',
     { expectFailure: 'Task with id 999 not found' },
     async () => {
-      const dao = new TaskDao(mockFileJson);
-      await dao.init();
-
       await dao.delete(999);
     }
   );
 
   t.test('should generate sequential ids when inserting multiple tasks', async () => {
-    const dao = new TaskDao(mockFileJson);
-    await dao.init();
-
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     const task3 = await dao.insert({ description: 'Task 3' });
@@ -194,12 +164,9 @@ test('Task DAO', (t) => {
   });
 
   t.test('should load persisted tasks after reinitializing DAO', async () => {
-    const dao1 = new TaskDao(mockFileJson);
-    await dao1.init();
+    await dao.insert({ description: 'Persisted task' });
 
-    await dao1.insert({ description: 'Persisted task' });
-
-    const dao2 = new TaskDao(mockFileJson);
+    const dao2 = new TaskDao(file);
     await dao2.init();
 
     const tasks = dao2.findAll();

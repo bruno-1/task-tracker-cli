@@ -1,35 +1,26 @@
-import path from 'node:path';
 import test from 'node:test';
-import { writeFile, rm } from 'node:fs/promises';
 import assert from 'node:assert';
 import { setTimeout } from 'node:timers/promises';
 
-import TaskDao from '../../src/dao/task-dao.js';
+import { createTestDao, destroyTestDao, seedTasks } from '../helpers/create-test-dao.js';
 import { markTask } from '../../src/cli/mark-task.js';
 import { TASK_STATUS } from '../../src/constants/task-status.js';
 
 
-const mockFileJson = path.resolve('test-mark-tasks.json');
-
 test('Mark Task', (t) => {
-  const dao = new TaskDao(mockFileJson);
+  let dao;
+  let file;
   let task1;
   let task2;
   let task3;
 
   t.beforeEach(async () => {
-    await writeFile(mockFileJson, JSON.stringify([]));
-    await dao.init();
-    task1 = await dao.insert({ description: 'Task 1' });
-    task2 = await dao.insert({ description: 'Task 2' });
-    task3 = await dao.insert({ description: 'Task 3' });
-
-    task1 = await dao.update(task1.id, { status: 'done' });
-    task2 = await dao.update(task2.id, { status: 'in-progress' });
+    ({ dao, file } = await createTestDao('test-mark-tasks.json'));
+    ({ task1, task2, task3 } = await seedTasks(dao));
   });
 
   t.afterEach(async () => {
-    await rm(mockFileJson);
+    await destroyTestDao(file);
   });
 
   t.test('should do nothing when mark command is not present', async () => {
