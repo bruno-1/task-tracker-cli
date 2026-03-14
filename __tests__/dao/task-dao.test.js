@@ -13,7 +13,7 @@ test('Task DAO', (t) => {
   let file;
 
   t.beforeEach(async () => {
-    ({ dao, file } = await createTestDao('test-tasks.json'));
+    ({ dao, file } = await createTestDao('test-task-dao.json'));
   });
 
   t.afterEach(async () => {
