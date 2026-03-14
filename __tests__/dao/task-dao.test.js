@@ -53,7 +53,7 @@ test('Task DAO', (t) => {
     assert.equal(tasks.length, 2);
   });
 
-  t.test('should return only done tasks', async (t) => {
+  t.test('should return only done tasks', async () => {
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     await dao.insert({ description: 'Task 3' });
@@ -67,7 +67,7 @@ test('Task DAO', (t) => {
     assert.strictEqual(doneTasks[0].id, task1.id);
   });
 
-  t.test('should return only todo tasks', async (t) => {
+  t.test('should return only todo tasks', async () => {
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     const task3 = await dao.insert({ description: 'Task 3' });
@@ -81,7 +81,7 @@ test('Task DAO', (t) => {
     assert.strictEqual(todoTasks[0].id, task3.id);
   });
 
-  t.test('should return only tasks in progress', async (t) => {
+  t.test('should return only tasks in progress', async () => {
     const task1 = await dao.insert({ description: 'Task 1' });
     const task2 = await dao.insert({ description: 'Task 2' });
     await dao.insert({ description: 'Task 3' });
@@ -99,7 +99,7 @@ test('Task DAO', (t) => {
     const originalTask = await dao.insert({ description: 'Buy groceries', });
     const originalUpdatedAt = originalTask.updatedAt.getTime();
 
-    const updatedDate = { description: 'Buy griceries and cook dinner' }
+    const updatedDate = { description: 'Buy groceries and cook dinner' }
     await setTimeout(1, null);
     const updatedTask = await dao.update(originalTask.id, updatedDate);
 
